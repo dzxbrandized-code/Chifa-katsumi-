@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta Chifa Katzumy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-zinc-900 border-b border-zinc-800 sticky top-0 z-40 px-4 py-3 flex items-center justify-between shadow-md">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-utensils text-red-500 text-xl"></i>
+            <h1 class="font-bold text-lg tracking-tight text-white">Chifa Katzumy</h1>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button onclick="abrirModalNuevoPlato()" class="bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center space-x-1 shadow">
+                <i class="fa-solid fa-plus"></i>
+                <span>Plato</span>
+            </button>
+            <button onclick="cambiarVista('menu')" id="btnVistaMenu" class="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition flex items-center space-x-1 border border-zinc-700">
+                <i class="fa-solid fa-book-open"></i>
+                <span class="hidden sm:inline">Carta</span>
+            </button>
+            <button onclick="cambiarVista('cuenta')" id="btnVistaCuenta" class="bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-2 rounded-lg text-xs font-medium transition relative flex items-center space-x-1 border border-zinc-700">
+                <i class="fa-solid fa-receipt"></i>
+                <span>Cuenta</span>
+                <span id="badgeCuenta" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold hidden">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Selector de Mesas (1 al 25 + Llevar) -->
+    <div class="bg-zinc-900/90 backdrop-blur border-b border-zinc-800 px-2 py-2 overflow-x-auto no-scrollbar sticky top-[57px] z-30">
+        <div class="flex space-x-1.5 min-w-max items-center" id="listaMesas">
+            <!-- Generado dinámicamente -->
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main class="flex-1 max-w-3xl w-full mx-auto p-3 pb-24">
+        
+        <!-- VISTA MENÚ -->
+        <div id="vistaMenu" class="space-y-4">
+            <!-- Buscador -->
+            <div class="relative">
+                <i class="fa-solid fa-search absolute left-3.5 top-3.5 text-zinc-400 text-sm"></i>
+                <input type="text" id="inputBuscar" oninput="filtrarPlatos()" placeholder="Buscar plato o bebida (ej. chaufa, tipakay, 1 lt...)" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-10 pr-10 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-red-500 transition shadow-inner">
+                <button onclick="limpiarBusqueda()" id="btnLimpiarBusq" class="absolute right-3 top-3 text-zinc-500 hover:text-zinc-300 hidden p-1">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Filtros de Categorías -->
+            <div class="overflow-x-auto no-scrollbar flex space-x-2 py-1" id="contenedorCategorias">
+                <button onclick="filtrarCategoria('TODOS')" class="cat-btn active bg-red-600 text-white px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition shadow">Todos</button>
+                <button onclick="filtrarCategoria('CHAUFA')" class="cat-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition">Chaufa</button>
+                <button onclick="filtrarCategoria('SOPAS')" class="cat-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition">Sopas</button>
+                <button onclick="filtrarCategoria('TALLARINES')" class="cat-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition">Tallarines</button>
+                <button onclick="filtrarCategoria('COMBINADOS')" class="cat-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition">Combinados</button>
+                <button onclick="filtrarCategoria('AEROPUERTOS')" class="cat-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition">Aeropuertos</button>
+                <button onclick="filtrarCategoria('ESPECIALES')" class="cat-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition">Especiales</button>
+                <button onclick="filtrarCategoria('DULCES')" class="cat-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition">Platos Dulces</button>
+                <button onclick="filtrarCategoria('ENTRADAS')" class="cat-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition">Entradas / Wantán</button>
+                <button onclick="filtrarCategoria('BEBIDAS')" class="cat-btn bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition">Bebidas</button>
+            </div>
+
+            <!-- Lista de Platos -->
+            <div id="gridPlatos" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <!-- Se inyecta con JS -->
+            </div>
+        </div>
+
+        <!-- VISTA CUENTA -->
+        <div id="vistaCuenta" class="hidden space-y-4">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+                    <div>
+                        <h2 id="tituloMesaActual" class="font-bold text-lg text-white">Mesa 1</h2>
+                        <p class="text-xs text-zinc-400">Resumen de consumo actual</p>
+                    </div>
+                    <button onclick="vaciarMesaActual()" class="text-xs text-red-400 hover:text-red-300 bg-red-950/40 border border-red-900/50 px-2.5 py-1.5 rounded-lg transition">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Limpiar cuenta
+                    </button>
+                </div>
+
+                <!-- Items en cuenta -->
+                <div id="listaItemsCuenta" class="divide-y divide-zinc-800/60 my-3 max-h-[45vh] overflow-y-auto no-scrollbar">
+                    <!-- Se inyecta con JS -->
+                </div>
+
+                <!-- Extras rápidos (Táper / Envase) -->
+                <div class="pt-3 border-t border-zinc-800 flex items-center justify-between text-xs">
+                    <span class="text-zinc-400">Agregar Envase / Extra:</span>
+                    <div class="flex space-x-1.5">
+                        <button onclick="agregarExtra(0.50)" class="bg-zinc-800 hover:bg-zinc-700 px-2.5 py-1 rounded-md border border-zinc-700 text-zinc-200">+ S/ 0.50</button>
+                        <button onclick="agregarExtra(1.00)" class="bg-zinc-800 hover:bg-zinc-700 px-2.5 py-1 rounded-md border border-zinc-700 text-zinc-200">+ S/ 1.00</button>
+                    </div>
+                </div>
+
+                <!-- Totales y Vuelto -->
+                <div class="mt-4 pt-3 border-t border-zinc-800 space-y-3">
+                    <div class="flex justify-between items-center text-lg font-bold">
+                        <span>Total a Pagar:</span>
+                        <span id="totalMesa" class="text-red-400 text-xl">S/ 0.00</span>
+                    </div>
+
+                    <!-- Calculadora de Vuelto -->
+                    <div class="bg-zinc-950/60 p-3 rounded-xl border border-zinc-800/80 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-zinc-400">Paga con (Efectivo):</span>
+                            <div class="flex space-x-1">
+                                <button onclick="setEfectivo(10)" class="bg-zinc-800 px-2 py-0.5 rounded text-[11px] text-zinc-300">10</button>
+                                <button onclick="setEfectivo(20)" class="bg-zinc-800 px-2 py-0.5 rounded text-[11px] text-zinc-300">20</button>
+                                <button onclick="setEfectivo(50)" class="bg-zinc-800 px-2 py-0.5 rounded text-[11px] text-zinc-300">50</button>
+                                <button onclick="setEfectivo(100)" class="bg-zinc-800 px-2 py-0.5 rounded text-[11px] text-zinc-300">100</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="inputEfectivo" oninput="calcularVuelto()" placeholder="Monto recibido" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500">
+                        </div>
+                        <div class="flex justify-between items-center text-sm font-semibold pt-1">
+                            <span class="text-zinc-400">Vuelto:</span>
+                            <span id="textoVuelto" class="text-emerald-400 font-bold">S/ 0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Botón Copiar Pedido -->
+                    <button onclick="copiarResumenMesa()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium py-2.5 rounded-xl text-xs transition flex items-center justify-center space-x-2 border border-zinc-700 shadow">
+                        <i class="fa-regular fa-copy"></i>
+                        <span>Copiar Comanda para enviar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Editar / Crear Plato -->
+    <div id="modalPlato" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center pb-2 border-b border-zinc-800">
+                <h3 id="modalTitulo" class="font-bold text-base text-white">Editar Plato</h3>
+                <button onclick="cerrarModalPlato()" class="text-zinc-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <input type="hidden" id="editId">
+            <div class="space-y-3 text-sm">
+                <div>
+                    <label class="block text-xs text-zinc-400 mb-1">Nombre del plato o bebida</label>
+                    <input type="text" id="editNombre" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Categoría</label>
+                        <select id="editCategoria" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-red-500">
+                            <option value="CHAUFA">Chaufa</option>
+                            <option value="SOPAS">Sopas</option>
+                            <option value="TALLARINES">Tallarines</option>
+                            <option value="COMBINADOS">Combinados</option>
+                            <option value="AEROPUERTOS">Aeropuertos</option>
+                            <option value="ESPECIALES">Especiales</option>
+                            <option value="DULCES">Platos Dulces</option>
+                            <option value="ENTRADAS">Entradas / Wantán</option>
+                            <option value="BEBIDAS">Bebidas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-zinc-400 mb-1">Precio (S/)</label>
+                        <input type="number" step="0.5" id="editPrecio" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-red-500">
+                    </div>
+                </div>
+            </div>
+            <div class="flex space-x-2 pt-2">
+                <button onclick="guardarPlatoModal()" class="flex-1 bg-red-600 hover:bg-red-500 text-white font-semibold py-2.5 rounded-xl text-xs transition shadow">Guardar Cambios</button>
+                <button onclick="eliminarPlatoActual()" id="btnEliminarPlato" class="bg-zinc-800 hover:bg-red-950 text-red-400 font-medium px-4 py-2.5 rounded-xl text-xs transition border border-zinc-700">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nota para Cocina -->
+    <div id="modalNota" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-sm w-full p-4 space-y-3 shadow-2xl">
+            <div class="flex justify-between items-center pb-2 border-b border-zinc-800">
+                <h3 class="font-bold text-sm text-white">Nota para el plato</h3>
+                <button onclick="cerrarModalNota()" class="text-zinc-400 hover:text-white p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <input type="hidden" id="notaIndexItem">
+            <div class="flex flex-wrap gap-1.5 py-1">
+                <button onclick="addTextoNota('Sin cebolla')" class="bg-zinc-800 hover:bg-zinc-700 text-xs px-2.5 py-1 rounded-lg border border-zinc-700 text-zinc-300">Sin cebolla</button>
+                <button onclick="addTextoNota('Para llevar')" class="bg-zinc-800 hover:bg-zinc-700 text-xs px-2.5 py-1 rounded-lg border border-zinc-700 text-zinc-300">Para llevar</button>
+                <button onclick="addTextoNota('Poco ají')" class="bg-zinc-800 hover:bg-zinc-700 text-xs px-2.5 py-1 rounded-lg border border-zinc-700 text-zinc-300">Poco ají</button>
+                <button onclick="addTextoNota('Bien frito')" class="bg-zinc-800 hover:bg-zinc-700 text-xs px-2.5 py-1 rounded-lg border border-zinc-700 text-zinc-300">Bien frito</button>
+                <button onclick="addTextoNota('Helada')" class="bg-zinc-800 hover:bg-zinc-700 text-xs px-2.5 py-1 rounded-lg border border-zinc-700 text-zinc-300">Helada</button>
+            </div>
+            <input type="text" id="inputNotaItem" placeholder="Otra nota (ej. sin culantro...)" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-red-500">
+            <button onclick="guardarNotaItem()" class="w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-2 rounded-xl text-xs transition">Aplicar Nota</button>
+        </div>
+    </div>
+
+    <script>
+        // Base de Datos Inicial con 84 ítems exactos de carta + Porciones de Wantán
+        const platosIniciales = [
+            // BEBIDAS (14)
+            { id: 1, nombre: "Jarra de Chicha", categoria: "BEBIDAS", precio: 10 },
+            { id: 2, nombre: "Vaso de Chicha", categoria: "BEBIDAS", precio: 2 },
+            { id: 3, nombre: "Inka Cola de Vidrio Personal", categoria: "BEBIDAS", precio: 3 },
+            { id: 4, nombre: "Coca Cola de Vidrio Personal", categoria: "BEBIDAS", precio: 3 },
+            { id: 5, nombre: "Inka Cola Descartable Personal", categoria: "BEBIDAS", precio: 5 },
+            { id: 6, nombre: "Coca Cola Descartable Personal", categoria: "BEBIDAS", precio: 5 },
+            { id: 7, nombre: "Agua", categoria: "BEBIDAS", precio: 3 },
+            { id: 8, nombre: "Inka Cola Gordita", categoria: "BEBIDAS", precio: 7 },
+            { id: 9, nombre: "Inka Cola de 1 Lt", categoria: "BEBIDAS", precio: 10 },
+            { id: 10, nombre: "Coca Cola de 1 Lt", categoria: "BEBIDAS", precio: 10 },
+            { id: 11, nombre: "Inka Cola de 1 Lt 1/2", categoria: "BEBIDAS", precio: 12 },
+            { id: 12, nombre: "Coca Cola de 1 Lt 1/2", categoria: "BEBIDAS", precio: 12 },
+            { id: 13, nombre: "Inka Cola de 2 Lt 1/2", categoria: "BEBIDAS", precio: 16 },
+            { id: 14, nombre: "Inka Cola de 3 Lt", categoria: "BEBIDAS", precio: 18 },
+            
+            // PLATOS DULCES (11)
+            { id: 15, nombre: "Tipakay", categoria: "DULCES", precio: 18 },
+            { id: 16, nombre: "Tipakay d/ Langostino", categoria: "DULCES", precio: 25 },
+            { id: 17, nombre: "Kalu Wantan c/ Chaufa", categoria: "DULCES", precio: 20 },
+            { id: 18, nombre: "Chancho c/ Piña", categoria: "DULCES", precio: 18 },
+            { id: 19, nombre: "Chancho c/ Durazno", categoria: "DULCES", precio: 18 },
+            { id: 20, nombre: "Chancho c/ Tamarindo", categoria: "DULCES", precio: 15 },
+            { id: 21, nombre: "Pollo c/ Tamarindo", categoria: "DULCES", precio: 15 },
+            { id: 22, nombre: "Pollo c/ Durazno", categoria: "DULCES", precio: 17 },
+            { id: 23, nombre: "Pollo c/ Piña", categoria: "DULCES", precio: 17 },
+            { id: 24, nombre: "Langostino c/ Tamarindo", categoria: "DULCES", precio: 22 },
+            { id: 25, nombre: "Enrollado c/ piña y durazno", categoria: "DULCES", precio: 25 },
+
+            // PLATOS ESPECIALES (10)
+            { id: 26, nombre: "Chijaukay c/ Chaufa", categoria: "ESPECIALES", precio: 18 },
+            { id: 27, nombre: "Chijaukay d/ Langostino", categoria: "ESPECIALES", precio: 25 },
+            { id: 28, nombre: "Chancho c/ Champiñón", categoria: "ESPECIALES", precio: 18 },
+            { id: 29, nombre: "Pollo c/ Champiñón", categoria: "ESPECIALES", precio: 18 },
+            { id: 30, nombre: "Pollo en Salsa d/ Ostion", categoria: "ESPECIALES", precio: 17 },
+            { id: 31, nombre: "Enrollado d/ Pollo", categoria: "ESPECIALES", precio: 20 },
+            { id: 32, nombre: "Enrollado d/ Langostino", categoria: "ESPECIALES", precio: 25 },
+            { id: 33, nombre: "Taypa c/ Chaufa", categoria: "ESPECIALES", precio: 20 },
+            { id: 34, nombre: "Chicharrón d/ Langostino", categoria: "ESPECIALES", precio: 25 },
+            { id: 35, nombre: "Chicharrón d/ Pollo", categoria: "ESPECIALES", precio: 18 },
+
+            // AEROPUERTOS (8)
+            { id: 36, nombre: "Aeropuerto d/ Pollo", categoria: "AEROPUERTOS", precio: 16 },
+            { id: 37, nombre: "Aeropuerto d/ Res", categoria: "AEROPUERTOS", precio: 17 },
+            { id: 38, nombre: "Aeropuerto d/ Chancho", categoria: "AEROPUERTOS", precio: 18 },
+            { id: 39, nombre: "Aeropuerto d/ Langostino", categoria: "AEROPUERTOS", precio: 22 },
+            { id: 40, nombre: "Aeropuerto Salvaje", categoria: "AEROPUERTOS", precio: 25 },
+            { id: 41, nombre: "Aeropuerto 3 Sabores", categoria: "AEROPUERTOS", precio: 25 },
+            { id: 42, nombre: "Aeropuerto d/ Langostino y Pollo", categoria: "AEROPUERTOS", precio: 25 },
+            { id
